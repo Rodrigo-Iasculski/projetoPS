@@ -1,0 +1,44 @@
+package com.app.calingaertextend;
+
+import java.util.Map;
+import java.io.File;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class LigadorPrimeiraPassagem{
+    private Map <String, Integer> tabelaGlobal = new HashMap<>();
+    
+    public void executarPassagem(List<File> modulos){
+        int baseEndereco = 0;
+
+        for (File modulo: modulos){
+            Leitor leitor = new Leitor();
+            List<ListaAsm> linhas = leitor.lerArquivo(modulo.getPath());
+            int enderecoRelativo = 0;
+
+            for (ListaAsm linha: linhas){
+                String tipo = linha.getTipo();
+                String conteudo = linha.getConteudo();
+
+                if (tipo.equalsIgnoreCase("INDEF")){
+                    String[] tokens = conteudo.split("\\s+");
+                    if (tokens.length >= 2){
+                        String simbolo = tokens[1];
+                        tabelaGlobal.put(simbolo, baseEndereco +enderecoRelativo);
+                    
+                    }
+                }
+                if (tipo.equals("codigo") || tipo.equals("chamada_macro") || tipo.equals ("codigo_macro")){
+                    enderecoRelativo++;
+                }
+            }
+            baseEndereco += enderecoRelativo; //calcula o endereço final real, ele soma o tamanho do modulo com o endereço real
+        }
+         // Imprime a Tabela Global
+        System.out.println("Tabela Global de Símbolos:");
+        for (Map.Entry<String, Integer> entrada : tabelaGlobal.entrySet()) {
+            System.out.println(entrada.getKey() + " → " + entrada.getValue());
+        }
+    }
+}
